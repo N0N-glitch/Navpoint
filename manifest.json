@@ -1,1 +1,33 @@
 
+{
+  "manifest_version": 3,
+  "name": "Navpoint",
+  "version": "1.0.0",
+  "description": "Uma extensão de navegador para navegação rápida por comandos.",
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "terminal/terminal.html",
+        "terminal/terminal.css",
+        "terminal/terminal.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}
+
