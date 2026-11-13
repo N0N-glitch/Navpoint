@@ -1,1 +1,57 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050b08">
+  <title>Navpoint Terminal</title>
+  <link rel="stylesheet" href="terminal.css">
+</head>
+<body>
+
+  <button id="navpoint-toggle" aria-label="Abrir Navpoint">
+    <span class="toggle-icon">⌘</span>
+  </button>
+
+  <main id="terminal" class="terminal hidden">
+    <header class="terminal-header">
+      <div class="terminal-brand">
+        <span class="status-dot"></span>
+        <span>NAVPOINT</span>
+      </div>
+
+      <div class="terminal-controls">
+        <button id="minimize-terminal" aria-label="Minimizar">−</button>
+        <button id="close-terminal" aria-label="Fechar">×</button>
+      </div>
+    </header>
+
+    <section id="terminal-output" class="terminal-output">
+      <p class="system-message">NAVPOINT SYSTEM [versão 1.0]</p>
+      <p>Terminal de navegação iniciado.</p>
+      <p>Digite <span class="command-highlight">help</span> para consultar os comandos.</p>
+    </section>
+
+    <form id="terminal-form" class="terminal-input-area">
+      <span class="prompt">&gt;</span>
+      <input
+        id="terminal-input"
+        type="text"
+        placeholder="Digite um comando..."
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      >
+    </form>
+
+    <footer class="terminal-footer">
+      <span> NAVPOINT </span>
+      <span>READY</span>
+    </footer>
+  </main>
+
+  <script src="terminal.js"></script>
+</body>
+</html>
+
