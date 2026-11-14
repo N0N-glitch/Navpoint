@@ -1,49 +1,22 @@
 
 (() => {
-  const toggleButton = document.getElementById("navpoint-toggle");
-  const terminal = document.getElementById("terminal");
   const closeButton = document.getElementById("close-terminal");
   const minimizeButton = document.getElementById("minimize-terminal");
   const form = document.getElementById("terminal-form");
   const input = document.getElementById("terminal-input");
   const output = document.getElementById("terminal-output");
 
-  if (
-    !toggleButton ||
-    !terminal ||
-    !closeButton ||
-    !minimizeButton ||
-    !form ||
-    !input ||
-    !output
-  ) {
+  if (!closeButton || !minimizeButton || !form || !input || !output) {
     return;
   }
 
-  // Abre e fecha o terminal.
-  function openTerminal() {
-    terminal.classList.remove("hidden");
-    toggleButton.setAttribute("aria-label", "Fechar Navpoint");
-    input.focus();
-  }
-
   function closeTerminal() {
-    terminal.classList.add("hidden");
-    toggleButton.setAttribute("aria-label", "Abrir Navpoint");
+    window.parent.postMessage("NAVPOINT_CLOSE", "*");
   }
-
-  toggleButton.addEventListener("click", () => {
-    if (terminal.classList.contains("hidden")) {
-      openTerminal();
-    } else {
-      closeTerminal();
-    }
-  });
 
   closeButton.addEventListener("click", closeTerminal);
   minimizeButton.addEventListener("click", closeTerminal);
 
-  // Adiciona mensagens sem interpretar HTML digitado.
   function printMessage(message, className = "") {
     const line = document.createElement("p");
     line.textContent = message;
@@ -56,27 +29,31 @@
     output.scrollTop = output.scrollHeight;
   }
 
-  // Comandos iniciais do Navpoint.
   function executeCommand(rawCommand) {
     const command = rawCommand.trim();
-    const normalized = command.toLowerCase();
 
     if (!command) return;
 
     printMessage("> " + command);
 
-    switch (normalized) {
+    const parts = command.split(/\s+/);
+    const action = parts[0].toLowerCase();
+
+    switch (action) {
       case "help":
         printMessage("COMANDOS DISPONÍVEIS:");
-        printMessage("help — mostra esta lista.");
+        printMessage("help — mostra os comandos.");
         printMessage("clear — limpa o terminal.");
         printMessage("version — mostra a versão.");
-        printMessage("open — navegação por endereço (em desenvolvimento).");
-        printMessage("settings — configurações (em desenvolvimento).");
+        printMessage("open — abrir um endereço (em desenvolvimento).");
+        printMessage("add — cadastrar atalho (em desenvolvimento).");
+        printMessage("list — listar atalhos (em desenvolvimento).");
+        printMessage("remove — remover atalho (em desenvolvimento).");
+        printMessage("settings — abrir configurações (em desenvolvimento).");
         break;
 
       case "clear":
-        output.innerHTML = "";
+        output.replaceChildren();
         printMessage("Terminal limpo.");
         break;
 
@@ -85,12 +62,12 @@
         break;
 
       case "open":
-        printMessage("Informe um endereço. A navegação será implementada na próxima etapa.");
-        break;
-
+      case "add":
+      case "list":
+      case "remove":
       case "settings":
       case "config":
-        printMessage("As configurações serão implementadas em uma próxima etapa.");
+        printMessage("Este comando será implementado na próxima etapa.");
         break;
 
       default:
@@ -102,7 +79,6 @@
     }
   }
 
-  // Recebe os comandos enviados pelo formulário.
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
@@ -112,5 +88,6 @@
     executeCommand(command);
     input.focus();
   });
-})();
 
+  input.focus();
+})();
