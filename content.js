@@ -1,10 +1,13 @@
 
 (() => {
+  "use strict";
+
   if (document.getElementById("navpoint-floating-button")) return;
 
   let terminalFrame = null;
 
   const button = document.createElement("button");
+
   button.id = "navpoint-floating-button";
   button.type = "button";
   button.textContent = "⌘";
@@ -74,11 +77,48 @@
   window.addEventListener("message", (event) => {
     if (event.source !== terminalFrame?.contentWindow) return;
 
+    // Fechar o terminal
     if (event.data === "NAVPOINT_CLOSE") {
       closeTerminal();
       return;
     }
 
+    // Solicitar navegação ao background.js
+    if (event.data?.type === "NAVPOINT_OPEN_URL") {
+      const requestedUrl = event.data.url;
+
+      chrome.runtime.sendMessage(
+        {
+          type: "NAVPOINT_OPEN_URL",
+          url: requestedUrl
+        },
+        (response) => {
+          const runtimeError = chrome.runtime.lastError;
+
+          if (runtimeError) {
+            sendTerminalMessage({
+              type: "NAVPOINT_OPEN_RESULT",
+              ok: false,
+              error: "Não foi possível comunicar com o Navpoint."
+            });
+
+            return;
+          }
+
+          sendTerminalMessage({
+            type: "NAVPOINT_OPEN_RESULT",
+            ...(response || {
+              ok: false,
+              error: "O navegador não retornou uma resposta."
+            })
+          });
+        }
+      );
+
+      return;
+    }
+
+    // Redimensionar o terminal
     if (event.data?.type === "NAVPOINT_RESIZE") {
       const maxWidth = Math.max(260, window.innerWidth - 20);
       const maxHeight = Math.max(220, window.innerHeight - 90);
@@ -97,6 +137,19 @@
       terminalFrame.style.height = `${height}px`;
     }
   });
+
+  function sendTerminalMessage(message) {
+    if (!terminalFrame?.contentWindow) return;
+
+    const extensionOrigin = new URL(
+      chrome.runtime.getURL("")
+    ).origin;
+
+    terminalFrame.contentWindow.postMessage(
+      message,
+      extensionOrigin
+    );
+  }
 
   document.documentElement.appendChild(button);
 })();
