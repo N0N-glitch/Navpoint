@@ -20,16 +20,23 @@
     return;
   }
 
-  // Fechar ou minimizar o terminal.
-  function closeTerminal() {
-    window.parent.postMessage("NAVPOINT_CLOSE", "*");
+  // Histórico persistente do terminal.
+  const HISTORY_KEY = "navpoint_terminal_history";
+  const MAX_HISTORY = 200;
+  let history = [];
+
+  function saveHistory() {
+    try {
+      localStorage.setItem(
+        HISTORY_KEY,
+        JSON.stringify(history.slice(-MAX_HISTORY))
+      );
+    } catch (error) {
+      console.warn("Navpoint: não foi possível salvar o histórico.", error);
+    }
   }
 
-  closeButton.addEventListener("click", closeTerminal);
-  minimizeButton.addEventListener("click", closeTerminal);
-
-  // Exibir mensagens no terminal.
-  function printMessage(message, className = "") {
+  function renderMessage(message, className = "") {
     const line = document.createElement("p");
     line.textContent = message;
 
@@ -40,6 +47,60 @@
     output.appendChild(line);
     output.scrollTop = output.scrollHeight;
   }
+
+  function loadHistory() {
+    try {
+      const savedHistory = localStorage.getItem(HISTORY_KEY);
+
+      if (!savedHistory) return;
+
+      const parsedHistory = JSON.parse(savedHistory);
+
+      if (!Array.isArray(parsedHistory)) return;
+
+      history = parsedHistory
+        .filter(
+          (item) =>
+            item &&
+            typeof item.message === "string" &&
+            typeof item.className === "string"
+        )
+        .slice(-MAX_HISTORY);
+
+      history.forEach((item) => {
+        renderMessage(item.message, item.className);
+      });
+    } catch (error) {
+      history = [];
+      console.warn("Navpoint: não foi possível carregar o histórico.", error);
+    }
+  }
+
+  function printMessage(message, className = "") {
+    renderMessage(message, className);
+
+    history.push({
+      message: String(message),
+      className: String(className)
+    });
+
+    if (history.length > MAX_HISTORY) {
+      history = history.slice(-MAX_HISTORY);
+    }
+
+    saveHistory();
+  }
+
+  // Restaurar o histórico ao abrir o terminal.
+  loadHistory();
+
+  // Fechar ou minimizar o terminal.
+  function closeTerminal() {
+    window.parent.postMessage("NAVPOINT_CLOSE", "*");
+  }
+
+  closeButton.addEventListener("click", closeTerminal);
+  minimizeButton.addEventListener("click", closeTerminal);
 
   // Preparar e validar um endereço.
   function prepareAddress(value) {
@@ -159,11 +220,9 @@
       case "help":
         printMessage("COMANDOS DISPONÍVEIS:");
         printMessage("help — mostra os comandos.");
-        printMessage("clear — limpa o terminal.");
+        printMessage("clear — limpa o terminal e o histórico.");
         printMessage("version — mostra a versão.");
         printMessage("open endereço — abre um site.");
-        printMessage("youtube — tenta abrir youtube.com.");
-        printMessage("github — tenta abrir github.com.");
         printMessage("add — cadastrar atalho (em desenvolvimento).");
         printMessage("list — listar atalhos (em desenvolvimento).");
         printMessage("remove — remover atalho (em desenvolvimento).");
@@ -171,7 +230,9 @@
         break;
 
       case "clear":
+        history = [];
         output.replaceChildren();
+        saveHistory();
         printMessage("Terminal limpo.");
         break;
 
