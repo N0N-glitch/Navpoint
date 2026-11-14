@@ -9,22 +9,40 @@
   const output = document.getElementById("terminal-output");
   const resizeHandle = document.getElementById("resize-handle");
 
+  const shortcutPanel = document.getElementById("shortcut-panel");
+  const shortcutForm = document.getElementById("shortcut-form");
+  const shortcutName = document.getElementById("shortcut-name");
+  const shortcutUrl = document.getElementById("shortcut-url");
+  const shortcutFeedback = document.getElementById("shortcut-feedback");
+  const cancelShortcut = document.getElementById("cancel-shortcut");
+
   if (
     !closeButton ||
     !minimizeButton ||
     !form ||
     !input ||
     !output ||
-    !resizeHandle
+    !resizeHandle ||
+    !shortcutPanel ||
+    !shortcutForm ||
+    !shortcutName ||
+    !shortcutUrl ||
+    !shortcutFeedback ||
+    !cancelShortcut
   ) {
     return;
   }
 
-  // Histórico persistente do terminal.
+  // Armazenamento local.
   const HISTORY_KEY = "navpoint_terminal_history";
+  const SHORTCUTS_KEY = "navpoint_shortcuts";
   const MAX_HISTORY = 200;
-  let history = [];
 
+  let history = [];
+  let shortcuts = {};
+  let shortcutMode = false;
+
+  // Histórico do terminal.
   function saveHistory() {
     try {
       localStorage.setItem(
@@ -32,7 +50,7 @@
         JSON.stringify(history.slice(-MAX_HISTORY))
       );
     } catch (error) {
-      console.warn("Navpoint: não foi possível salvar o histórico.", error);
+      console.warn("Navpoint: erro ao salvar histórico.", error);
     }
   }
 
@@ -50,29 +68,29 @@
 
   function loadHistory() {
     try {
-      const savedHistory = localStorage.getItem(HISTORY_KEY);
+      const saved = localStorage.getItem(HISTORY_KEY);
 
-      if (!savedHistory) return;
+      if (!saved) return;
 
-      const parsedHistory = JSON.parse(savedHistory);
+      const parsed = JSON.parse(saved);
 
-      if (!Array.isArray(parsedHistory)) return;
+      if (!Array.isArray(parsed)) return;
 
-      history = parsedHistory
+      history = parsed
         .filter(
-          (item) =>
+          item =>
             item &&
             typeof item.message === "string" &&
             typeof item.className === "string"
         )
         .slice(-MAX_HISTORY);
 
-      history.forEach((item) => {
+      history.forEach(item => {
         renderMessage(item.message, item.className);
       });
     } catch (error) {
       history = [];
-      console.warn("Navpoint: não foi possível carregar o histórico.", error);
+      console.warn("Navpoint: erro ao carregar histórico.", error);
     }
   }
 
@@ -91,10 +109,47 @@
     saveHistory();
   }
 
-  // Restaurar o histórico ao abrir o terminal.
   loadHistory();
 
-  // Fechar ou minimizar o terminal.
+  // Atalhos personalizados.
+  function loadShortcuts() {
+    try {
+      const saved = localStorage.getItem(SHORTCUTS_KEY);
+
+      if (!saved) return;
+
+      const parsed = JSON.parse(saved);
+
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        !Array.isArray(parsed)
+      ) {
+        shortcuts = parsed;
+      }
+    } catch (error) {
+      shortcuts = {};
+      console.warn("Navpoint: erro ao carregar atalhos.", error);
+    }
+  }
+
+  function saveShortcuts() {
+    try {
+      localStorage.setItem(
+        SHORTCUTS_KEY,
+        JSON.stringify(shortcuts)
+      );
+
+      return true;
+    } catch (error) {
+      console.warn("Navpoint: erro ao salvar atalhos.", error);
+      return false;
+    }
+  }
+
+  loadShortcuts();
+
+  // Fechar ou minimizar.
   function closeTerminal() {
     window.parent.postMessage("NAVPOINT_CLOSE", "*");
   }
@@ -102,7 +157,7 @@
   closeButton.addEventListener("click", closeTerminal);
   minimizeButton.addEventListener("click", closeTerminal);
 
-  // Preparar e validar um endereço.
+  // Validar endereços.
   function prepareAddress(value) {
     let address = value.trim();
 
@@ -114,14 +169,12 @@
       throw new Error("O endereço não pode conter espaços.");
     }
 
-    // Não permitir protocolos diferentes de HTTP e HTTPS.
     if (/^[a-z][a-z0-9+.-]*:/i.test(address)) {
       if (!/^https?:\/\//i.test(address)) {
-        throw new Error("Somente endereços HTTP e HTTPS são permitidos.");
+        throw new Error("Somente HTTP e HTTPS são permitidos.");
       }
     }
 
-    // Nome simples: youtube vira youtube.com.
     if (!address.includes(".") && !/^https?:\/\//i.test(address)) {
       if (!/^[a-z0-9-]+$/i.test(address)) {
         throw new Error("Nome de site inválido.");
@@ -154,7 +207,7 @@
     return parsed.href;
   }
 
-  // Solicitar abertura de um endereço.
+  // Abrir endereço.
   function openAddress(value) {
     let url;
 
@@ -177,7 +230,7 @@
   }
 
   // Receber respostas do content.js.
-  window.addEventListener("message", (event) => {
+  window.addEventListener("message", event => {
     if (event.source !== window.parent) return;
 
     const extensionOrigin = new URL(
@@ -194,6 +247,119 @@
         );
       }
     }
+  });
+
+  // Abrir o formulário de cadastro.
+  function openShortcutForm() {
+    shortcutMode = true;
+
+    output.hidden = true;
+    form.hidden = true;
+    shortcutPanel.hidden = false;
+
+    shortcutName.value = "";
+    shortcutUrl.value = "";
+    shortcutFeedback.textContent = "";
+    shortcutFeedback.className = "shortcut-feedback";
+
+    shortcutName.focus();
+  }
+
+  // Voltar ao terminal normal.
+  function closeShortcutForm() {
+    shortcutMode = false;
+
+    shortcutPanel.hidden = true;
+    output.hidden = false;
+    form.hidden = false;
+
+    input.focus();
+  }
+
+  cancelShortcut.addEventListener("click", closeShortcutForm);
+
+  // Confirmar cadastro sem sair do formulário.
+  shortcutForm.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const name = shortcutName.value.trim();
+    const address = shortcutUrl.value.trim();
+
+    if (!name || !address) {
+      shortcutFeedback.textContent = "Preencha os dois campos.";
+      shortcutFeedback.className = "shortcut-feedback error";
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+      shortcutFeedback.textContent =
+        "Use apenas letras, números, hífen ou sublinhado no nome.";
+      shortcutFeedback.className = "shortcut-feedback error";
+      shortcutName.focus();
+      return;
+    }
+
+    const alias = name.toLowerCase();
+
+    if (
+      [
+        "help",
+        "clear",
+        "version",
+        "open",
+        "add",
+        "list",
+        "remove",
+        "settings",
+        "config"
+      ].includes(alias)
+    ) {
+      shortcutFeedback.textContent =
+        "Esse nome é reservado para um comando do Navpoint.";
+      shortcutFeedback.className = "shortcut-feedback error";
+      shortcutName.focus();
+      return;
+    }
+
+    if (Object.keys(shortcuts).some(
+      existing => existing.toLowerCase() === alias
+    )) {
+      shortcutFeedback.textContent =
+        "Já existe um atalho com esse nome.";
+      shortcutFeedback.className = "shortcut-feedback error";
+      shortcutName.focus();
+      return;
+    }
+
+    let url;
+
+    try {
+      url = prepareAddress(address);
+    } catch (error) {
+      shortcutFeedback.textContent = error.message;
+      shortcutFeedback.className = "shortcut-feedback error";
+      shortcutUrl.focus();
+      return;
+    }
+
+    shortcuts[name] = url;
+
+    if (!saveShortcuts()) {
+      delete shortcuts[name];
+
+      shortcutFeedback.textContent =
+        "Não foi possível salvar. Tente novamente.";
+      shortcutFeedback.className = "shortcut-feedback error";
+      return;
+    }
+
+    shortcutFeedback.textContent =
+      "Atalho " + name + " criado com sucesso! Você pode cadastrar outro.";
+    shortcutFeedback.className = "shortcut-feedback";
+
+    shortcutName.value = "";
+    shortcutUrl.value = "";
+    shortcutName.focus();
   });
 
   // Interpretar comandos.
@@ -223,9 +389,9 @@
         printMessage("clear — limpa o terminal e o histórico.");
         printMessage("version — mostra a versão.");
         printMessage("open endereço — abre um site.");
-        printMessage("add — cadastrar atalho (em desenvolvimento).");
-        printMessage("list — listar atalhos (em desenvolvimento).");
-        printMessage("remove — remover atalho (em desenvolvimento).");
+        printMessage("add — cadastrar um atalho.");
+        printMessage("list — listar atalhos (próxima etapa).");
+        printMessage("remove — remover atalho (próxima etapa).");
         printMessage("settings — abrir configurações (em desenvolvimento).");
         break;
 
@@ -250,6 +416,9 @@
         break;
 
       case "add":
+        openShortcutForm();
+        break;
+
       case "list":
       case "remove":
       case "settings":
@@ -257,20 +426,32 @@
         printMessage("Este comando será implementado em uma próxima etapa.");
         break;
 
-      default:
-        // Nomes de sites digitados diretamente.
-        openAddress(command);
+      default: {
+        // Atalhos personalizados têm prioridade.
+        const shortcutKey = Object.keys(shortcuts).find(
+          key => key.toLowerCase() === action
+        );
+
+        if (shortcutKey) {
+          openAddress(shortcuts[shortcutKey]);
+        } else {
+          openAddress(command);
+        }
+      }
     }
   }
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", event => {
     event.preventDefault();
 
     const command = input.value;
     input.value = "";
 
     executeCommand(command);
-    input.focus();
+
+    if (!shortcutMode) {
+      input.focus();
+    }
   });
 
   // Redimensionar com toque ou mouse.
@@ -280,7 +461,7 @@
   let startWidth = 0;
   let startHeight = 0;
 
-  resizeHandle.addEventListener("pointerdown", (event) => {
+  resizeHandle.addEventListener("pointerdown", event => {
     event.preventDefault();
 
     resizing = true;
@@ -293,20 +474,17 @@
     resizeHandle.setPointerCapture(event.pointerId);
   });
 
-  resizeHandle.addEventListener("pointermove", (event) => {
+  resizeHandle.addEventListener("pointermove", event => {
     if (!resizing) return;
 
     const deltaX = event.clientX - startX;
     const deltaY = event.clientY - startY;
 
-    const width = startWidth + deltaX;
-    const height = startHeight + deltaY;
-
     window.parent.postMessage(
       {
         type: "NAVPOINT_RESIZE",
-        width,
-        height
+        width: startWidth + deltaX,
+        height: startHeight + deltaY
       },
       "*"
     );
