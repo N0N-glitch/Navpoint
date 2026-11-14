@@ -9,12 +9,7 @@
   <link rel="stylesheet" href="terminal.css">
 </head>
 <body>
-
-  <button id="navpoint-toggle" aria-label="Abrir Navpoint">
-    <span class="toggle-icon">⌘</span>
-  </button>
-
-  <main id="terminal" class="terminal hidden">
+  <main id="terminal" class="terminal">
     <header class="terminal-header">
       <div class="terminal-brand">
         <span class="status-dot"></span>
@@ -27,7 +22,7 @@
       </div>
     </header>
 
-    <section id="terminal-output" class="terminal-output">
+    <section id="terminal-output" class="terminal-output" aria-live="polite">
       <p class="system-message">NAVPOINT SYSTEM [versão 1.0]</p>
       <p>Terminal de navegação iniciado.</p>
       <p>Digite <span class="command-highlight">help</span> para consultar os comandos.</p>
@@ -46,7 +41,7 @@
     </form>
 
     <footer class="terminal-footer">
-      <span> NAVPOINT </span>
+      <span>NAVPOINT</span>
       <span>READY</span>
     </footer>
   </main>
@@ -54,4 +49,3 @@
   <script src="terminal.js"></script>
 </body>
 </html>
-
