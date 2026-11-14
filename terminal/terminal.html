@@ -29,6 +29,54 @@
       <p>Digite <span class="command-highlight">help</span> para consultar os comandos.</p>
     </section>
 
+    <section id="shortcut-panel" class="shortcut-panel" hidden>
+      <div class="shortcut-heading">
+        <span class="status-dot"></span>
+        <h2>NOVO ATALHO</h2>
+      </div>
+
+      <form id="shortcut-form" class="shortcut-form">
+        <label for="shortcut-name">Qual será o nome do atalho?</label>
+        <input
+          id="shortcut-name"
+          type="text"
+          placeholder="Ex.: YT, GPT, WIKI..."
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          maxlength="30"
+          required
+        >
+
+        <label for="shortcut-url">Para onde o atalho deve levar?</label>
+        <input
+          id="shortcut-url"
+          type="text"
+          placeholder="Ex.: https://youtube.com"
+          autocomplete="url"
+          autocapitalize="off"
+          spellcheck="false"
+          required
+        >
+
+        <p id="shortcut-feedback" class="shortcut-feedback" aria-live="polite"></p>
+
+        <div class="shortcut-actions">
+          <button
+            id="cancel-shortcut"
+            class="cancel-shortcut"
+            type="button"
+            aria-label="Voltar ao terminal"
+            title="Voltar ao terminal"
+          >×</button>
+
+          <button class="confirm-shortcut" type="submit">
+            Confirmar
+          </button>
+        </div>
+      </form>
+    </section>
+
     <form id="terminal-form" class="terminal-input-area">
       <span class="prompt">&gt;</span>
       <input
