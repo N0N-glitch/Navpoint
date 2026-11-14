@@ -1,5 +1,7 @@
 
 (() => {
+  "use strict";
+
   const closeButton = document.getElementById("close-terminal");
   const minimizeButton = document.getElementById("minimize-terminal");
   const form = document.getElementById("terminal-form");
@@ -39,6 +41,100 @@
     output.scrollTop = output.scrollHeight;
   }
 
+  // Preparar e validar um endereço.
+  function prepareAddress(value) {
+    let address = value.trim();
+
+    if (!address) {
+      throw new Error("Digite um endereço para abrir.");
+    }
+
+    if (/\s/.test(address)) {
+      throw new Error("O endereço não pode conter espaços.");
+    }
+
+    // Não permitir protocolos diferentes de HTTP e HTTPS.
+    if (/^[a-z][a-z0-9+.-]*:/i.test(address)) {
+      if (!/^https?:\/\//i.test(address)) {
+        throw new Error("Somente endereços HTTP e HTTPS são permitidos.");
+      }
+    }
+
+    // Nome simples: youtube vira youtube.com.
+    if (!address.includes(".") && !/^https?:\/\//i.test(address)) {
+      if (!/^[a-z0-9-]+$/i.test(address)) {
+        throw new Error("Nome de site inválido.");
+      }
+
+      address += ".com";
+    }
+
+    if (!/^https?:\/\//i.test(address)) {
+      address = "https://" + address;
+    }
+
+    let parsed;
+
+    try {
+      parsed = new URL(address);
+    } catch {
+      throw new Error("Não foi possível reconhecer esse endereço.");
+    }
+
+    if (
+      !["http:", "https:"].includes(parsed.protocol) ||
+      !parsed.hostname ||
+      parsed.username ||
+      parsed.password
+    ) {
+      throw new Error("O endereço informado não é permitido.");
+    }
+
+    return parsed.href;
+  }
+
+  // Solicitar abertura de um endereço.
+  function openAddress(value) {
+    let url;
+
+    try {
+      url = prepareAddress(value);
+    } catch (error) {
+      printMessage(error.message, "error");
+      return;
+    }
+
+    printMessage("Abrindo " + url + "...", "success");
+
+    window.parent.postMessage(
+      {
+        type: "NAVPOINT_OPEN_URL",
+        url
+      },
+      "*"
+    );
+  }
+
+  // Receber respostas do content.js.
+  window.addEventListener("message", (event) => {
+    if (event.source !== window.parent) return;
+
+    const extensionOrigin = new URL(
+      chrome.runtime.getURL("")
+    ).origin;
+
+    if (event.origin !== extensionOrigin) return;
+
+    if (event.data?.type === "NAVPOINT_OPEN_RESULT") {
+      if (!event.data.ok) {
+        printMessage(
+          event.data.error || "Não foi possível abrir o endereço.",
+          "error"
+        );
+      }
+    }
+  });
+
   // Interpretar comandos.
   function executeCommand(rawCommand) {
     const command = rawCommand.trim();
@@ -47,8 +143,17 @@
 
     printMessage("> " + command);
 
-    const parts = command.split(/\s+/);
-    const action = parts[0].toLowerCase();
+    const firstSpace = command.search(/\s/);
+
+    const action = (
+      firstSpace === -1
+        ? command
+        : command.slice(0, firstSpace)
+    ).toLowerCase();
+
+    const argument = firstSpace === -1
+      ? ""
+      : command.slice(firstSpace).trim();
 
     switch (action) {
       case "help":
@@ -56,7 +161,9 @@
         printMessage("help — mostra os comandos.");
         printMessage("clear — limpa o terminal.");
         printMessage("version — mostra a versão.");
-        printMessage("open — abrir um endereço (em desenvolvimento).");
+        printMessage("open endereço — abre um site.");
+        printMessage("youtube — tenta abrir youtube.com.");
+        printMessage("github — tenta abrir github.com.");
         printMessage("add — cadastrar atalho (em desenvolvimento).");
         printMessage("list — listar atalhos (em desenvolvimento).");
         printMessage("remove — remover atalho (em desenvolvimento).");
@@ -73,20 +180,25 @@
         break;
 
       case "open":
+        if (!argument) {
+          printMessage("Uso correto: open youtube.com");
+          break;
+        }
+
+        openAddress(argument);
+        break;
+
       case "add":
       case "list":
       case "remove":
       case "settings":
       case "config":
-        printMessage("Este comando será implementado na próxima etapa.");
+        printMessage("Este comando será implementado em uma próxima etapa.");
         break;
 
       default:
-        printMessage(
-          'Comando não reconhecido: "' +
-          command +
-          '". Digite help para ver os comandos.'
-        );
+        // Nomes de sites digitados diretamente.
+        openAddress(command);
     }
   }
 
