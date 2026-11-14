@@ -4,6 +4,11 @@
   "name": "Navpoint",
   "version": "1.0.0",
   "description": "Uma extensão de navegador para navegação rápida por comandos.",
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
   "content_scripts": [
     {
       "matches": [
@@ -16,6 +21,7 @@
       "run_at": "document_idle"
     }
   ],
+
   "web_accessible_resources": [
     {
       "resources": [
@@ -30,4 +36,3 @@
     }
   ]
 }
-
