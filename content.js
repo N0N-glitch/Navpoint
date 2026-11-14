@@ -31,6 +31,7 @@
       terminalFrame.remove();
       terminalFrame = null;
     }
+
     button.setAttribute("aria-label", "Abrir Navpoint");
   }
 
@@ -42,12 +43,15 @@
     terminalFrame.title = "Navpoint Terminal";
     terminalFrame.src = chrome.runtime.getURL("terminal/terminal.html");
 
+    const initialWidth = Math.min(330, window.innerWidth - 20);
+    const initialHeight = Math.min(360, window.innerHeight - 90);
+
     Object.assign(terminalFrame.style, {
       position: "fixed",
       top: "74px",
       left: "10px",
-      width: "min(430px, calc(100vw - 20px))",
-      height: "min(520px, calc(100dvh - 90px))",
+      width: `${Math.max(260, initialWidth)}px`,
+      height: `${Math.max(220, initialHeight)}px`,
       border: "0",
       borderRadius: "15px",
       background: "transparent",
@@ -55,6 +59,7 @@
     });
 
     document.documentElement.appendChild(terminalFrame);
+
     button.setAttribute("aria-label", "Navpoint aberto");
   }
 
@@ -71,6 +76,25 @@
 
     if (event.data === "NAVPOINT_CLOSE") {
       closeTerminal();
+      return;
+    }
+
+    if (event.data?.type === "NAVPOINT_RESIZE") {
+      const maxWidth = Math.max(260, window.innerWidth - 20);
+      const maxHeight = Math.max(220, window.innerHeight - 90);
+
+      const width = Math.min(
+        maxWidth,
+        Math.max(260, Number(event.data.width) || 330)
+      );
+
+      const height = Math.min(
+        maxHeight,
+        Math.max(220, Number(event.data.height) || 360)
+      );
+
+      terminalFrame.style.width = `${width}px`;
+      terminalFrame.style.height = `${height}px`;
     }
   });
 
