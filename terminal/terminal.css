@@ -7,6 +7,8 @@
   --text: #d9f7e5;
   --muted: #779886;
   --border: rgba(0, 255, 136, 0.22);
+  --danger: #b83232;
+  --danger-light: #ff7777;
 }
 
 * {
@@ -67,6 +69,7 @@ input {
 .status-dot {
   width: 8px;
   height: 8px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 9px var(--green);
@@ -149,6 +152,131 @@ input {
   color: var(--muted);
   font-size: 10px;
   letter-spacing: 1px;
+}
+
+/* Cadastro de atalhos */
+
+.shortcut-panel {
+  flex: 1;
+  min-height: 0;
+  padding: 20px 17px;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.shortcut-panel[hidden] {
+  display: none;
+}
+
+.shortcut-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.shortcut-heading h2 {
+  margin: 0;
+  color: var(--green);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.shortcut-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shortcut-form label {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.shortcut-form input {
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  outline: none;
+  background: var(--panel-light);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.shortcut-form input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 9px rgba(0, 255, 136, 0.12);
+}
+
+.shortcut-form input::placeholder {
+  color: var(--muted);
+}
+
+.shortcut-feedback {
+  min-height: 18px;
+  margin: 5px 0 0;
+  color: var(--green);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.shortcut-feedback.error {
+  color: var(--danger-light);
+}
+
+.shortcut-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.cancel-shortcut {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--danger);
+  border-radius: 7px;
+  background: rgba(184, 50, 50, 0.18);
+  color: #ffffff;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cancel-shortcut:active {
+  background: rgba(184, 50, 50, 0.4);
+}
+
+.confirm-shortcut {
+  min-width: 112px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--green);
+  border-radius: 7px;
+  background: var(--green);
+  color: #031009;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.confirm-shortcut:active {
+  background: #00d977;
+}
+
+.confirm-shortcut:disabled,
+.cancel-shortcut:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Alça para redimensionar com o dedo */
