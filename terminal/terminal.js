@@ -39,7 +39,7 @@
   const MAX_HISTORY = 200;
 
   let history = [];
-  let shortcuts = {};
+  let shortcuts = Object.create(null);
   let shortcutMode = false;
 
   // Histórico do terminal.
@@ -121,14 +121,27 @@
       const parsed = JSON.parse(saved);
 
       if (
-        parsed &&
-        typeof parsed === "object" &&
-        !Array.isArray(parsed)
+        !parsed ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed)
       ) {
-        shortcuts = parsed;
+        return;
       }
+
+      const safeShortcuts = Object.create(null);
+
+      Object.keys(parsed).forEach(key => {
+        if (
+          /^[a-zA-Z0-9_-]+$/.test(key) &&
+          typeof parsed[key] === "string"
+        ) {
+          safeShortcuts[key] = parsed[key];
+        }
+      });
+
+      shortcuts = safeShortcuts;
     } catch (error) {
-      shortcuts = {};
+      shortcuts = Object.create(null);
       console.warn("Navpoint: erro ao carregar atalhos.", error);
     }
   }
@@ -301,19 +314,22 @@
 
     const alias = name.toLowerCase();
 
-    if (
-      [
-        "help",
-        "clear",
-        "version",
-        "open",
-        "add",
-        "list",
-        "remove",
-        "settings",
-        "config"
-      ].includes(alias)
-    ) {
+    const reservedNames = [
+      "help",
+      "clear",
+      "version",
+      "open",
+      "add",
+      "list",
+      "remove",
+      "settings",
+      "config",
+      "__proto__",
+      "prototype",
+      "constructor"
+    ];
+
+    if (reservedNames.includes(alias)) {
       shortcutFeedback.textContent =
         "Esse nome é reservado para um comando do Navpoint.";
       shortcutFeedback.className = "shortcut-feedback error";
@@ -321,9 +337,11 @@
       return;
     }
 
-    if (Object.keys(shortcuts).some(
-      existing => existing.toLowerCase() === alias
-    )) {
+    if (
+      Object.keys(shortcuts).some(
+        existing => existing.toLowerCase() === alias
+      )
+    ) {
       shortcutFeedback.textContent =
         "Já existe um atalho com esse nome.";
       shortcutFeedback.className = "shortcut-feedback error";
@@ -362,6 +380,65 @@
     shortcutName.focus();
   });
 
+  // Listar atalhos cadastrados.
+  function listShortcuts() {
+    const names = Object.keys(shortcuts);
+
+    if (names.length === 0) {
+      printMessage("Você ainda não possui atalhos cadastrados.");
+      printMessage("Digite add para criar seu primeiro atalho.");
+      return;
+    }
+
+    printMessage("ATALHOS CADASTRADOS:");
+
+    names.forEach(name => {
+      printMessage(name + " — " + shortcuts[name], "success");
+    });
+
+    printMessage("Total: " + names.length + " atalho(s).");
+  }
+
+  // Remover um atalho.
+  function removeShortcut(name) {
+    if (!name) {
+      printMessage("Uso correto: remove NOME");
+      printMessage("Digite list para consultar seus atalhos.");
+      return;
+    }
+
+    const shortcutKey = Object.keys(shortcuts).find(
+      key => key.toLowerCase() === name.toLowerCase()
+    );
+
+    if (!shortcutKey) {
+      printMessage(
+        'O atalho "' + name + '" não foi encontrado.',
+        "error"
+      );
+      printMessage("Digite list para consultar os atalhos disponíveis.");
+      return;
+    }
+
+    const removedUrl = shortcuts[shortcutKey];
+    delete shortcuts[shortcutKey];
+
+    if (!saveShortcuts()) {
+      shortcuts[shortcutKey] = removedUrl;
+
+      printMessage(
+        "Não foi possível remover o atalho. Tente novamente.",
+        "error"
+      );
+      return;
+    }
+
+    printMessage(
+      'Atalho "' + shortcutKey + '" removido com sucesso.',
+      "success"
+    );
+  }
+
   // Interpretar comandos.
   function executeCommand(rawCommand) {
     const command = rawCommand.trim();
@@ -390,8 +467,8 @@
         printMessage("version — mostra a versão.");
         printMessage("open endereço — abre um site.");
         printMessage("add — cadastrar um atalho.");
-        printMessage("list — listar atalhos (próxima etapa).");
-        printMessage("remove — remover atalho (próxima etapa).");
+        printMessage("list — listar todos os atalhos.");
+        printMessage("remove NOME — remover um atalho.");
         printMessage("settings — abrir configurações (em desenvolvimento).");
         break;
 
@@ -420,7 +497,13 @@
         break;
 
       case "list":
+        listShortcuts();
+        break;
+
       case "remove":
+        removeShortcut(argument);
+        break;
+
       case "settings":
       case "config":
         printMessage("Este comando será implementado em uma próxima etapa.");
