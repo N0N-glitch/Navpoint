@@ -122,6 +122,11 @@ input {
   background: var(--panel);
 }
 
+/* CORREÇÃO: respeitar o atributo hidden */
+.terminal-input-area[hidden] {
+  display: none !important;
+}
+
 .prompt {
   color: var(--green);
   font-size: 19px;
