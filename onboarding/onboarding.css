@@ -247,12 +247,93 @@ h1 {
   color: #003300;
 }
 
-.chosen-level {
-  margin: 0;
+/* Cadastro de atalhos */
+
+.shortcut-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.field-label {
+  color: var(--green-dim);
+  font-size: 14px;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 48px;
   padding: 10px 12px;
-  border: 1px solid var(--green-faint);
+  border: 1px solid var(--green-dim);
   border-radius: 6px;
+  background: #050505;
+  color: var(--green);
+  caret-color: var(--green);
+  font-family: var(--font);
+  font-size: 16px;
+}
+
+.field-input::placeholder {
+  color: #2f6b2f;
+}
+
+.field-input:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.feedback {
+  min-height: 20px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.feedback.error {
+  color: var(--error);
+}
+
+.created-box {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--green-faint);
+}
+
+.created-title {
+  margin: 0 0 8px;
   font-size: 15px;
+  font-weight: bold;
+}
+
+.created-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.created-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--green-faint);
+}
+
+.created-name {
+  font-weight: bold;
+}
+
+.created-url {
+  color: var(--green-dim);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  margin: 0;
+  color: var(--green-dim);
+  font-size: 14px;
 }
 
 .status {
@@ -322,7 +403,8 @@ h1 {
   outline-offset: 2px;
 }
 
-.confirm:disabled {
+.confirm:disabled,
+.ghost:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -331,4 +413,4 @@ h1 {
   .cursor {
     animation: none;
   }
-    }
+  }
