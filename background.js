@@ -2,6 +2,8 @@
   "use strict";
 
   const ONBOARDING_URL = "onboarding/onboarding.html?transition=rain";
+  const SETTINGS_PAGE = "settings/settings.html";
+  const OPEN_MODE_KEY = "navpoint_open_mode";
 
   function normalizeAddress(value) {
     if (typeof value !== "string" || !value.trim()) {
@@ -45,9 +47,46 @@
     return parsed.href;
   }
 
+  // Abre o endereço na aba atual ou em uma nova,
+  // conforme a preferência salva nas configurações.
+  function openUrl(url, sender, sendResponse) {
+    chrome.storage.local.get(OPEN_MODE_KEY, saved => {
+      const readError = chrome.runtime.lastError;
+
+      // Se a leitura falhar, usa a aba atual.
+      const openInNewTab =
+        !readError && saved && saved[OPEN_MODE_KEY] === "new";
+
+      const finish = () => {
+        if (chrome.runtime.lastError) {
+          sendResponse({
+            ok: false,
+            error: "Não foi possível abrir esse endereço."
+          });
+
+          return;
+        }
+
+        sendResponse({
+          ok: true,
+          url
+        });
+      };
+
+      if (openInNewTab) {
+        chrome.tabs.create(
+          { url, active: true, openerTabId: sender.tab.id },
+          finish
+        );
+      } else {
+        chrome.tabs.update(sender.tab.id, { url }, finish);
+      }
+    });
+  }
+
   chrome.runtime.onMessage.addListener(
     (message, sender, sendResponse) => {
-      // Abrir um endereço na aba atual.
+      // Abrir um endereço.
       if (message?.type === "NAVPOINT_OPEN_URL") {
         if (!sender.tab || typeof sender.tab.id !== "number") {
           sendResponse({
@@ -71,23 +110,7 @@
           return;
         }
 
-        chrome.tabs.update(sender.tab.id, { url }, () => {
-          const browserError = chrome.runtime.lastError;
-
-          if (browserError) {
-            sendResponse({
-              ok: false,
-              error: "Não foi possível abrir esse endereço."
-            });
-
-            return;
-          }
-
-          sendResponse({
-            ok: true,
-            url
-          });
-        });
+        openUrl(url, sender, sendResponse);
 
         return true;
       }
@@ -102,6 +125,23 @@
         chrome.tabs.update(
           sender.tab.id,
           { url: chrome.runtime.getURL(ONBOARDING_URL) },
+          () => {
+            if (chrome.runtime.lastError) {
+              sendResponse({ ok: false });
+              return;
+            }
+
+            sendResponse({ ok: true });
+          }
+        );
+
+        return true;
+      }
+
+      // Abrir o painel de configurações em uma nova aba.
+      if (message?.type === "NAVPOINT_OPEN_SETTINGS") {
+        chrome.tabs.create(
+          { url: chrome.runtime.getURL(SETTINGS_PAGE) },
           () => {
             if (chrome.runtime.lastError) {
               sendResponse({ ok: false });
