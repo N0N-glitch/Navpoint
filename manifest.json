@@ -1,9 +1,12 @@
-
 {
   "manifest_version": 3,
   "name": "Navpoint",
   "version": "1.0.0",
   "description": "Uma extensão de navegador para navegação rápida por comandos.",
+
+  "permissions": [
+    "storage"
+  ],
 
   "background": {
     "service_worker": "background.js"
