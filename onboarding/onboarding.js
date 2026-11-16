@@ -2,12 +2,15 @@
   "use strict";
 
   const LANGUAGE_KEY = "navpoint_language";
+  const LEVEL_KEY = "navpoint_setup_level";
 
   const LANGUAGES = [
     { code: "pt", name: "Português" },
     { code: "en", name: "English" },
     { code: "es", name: "Español" }
   ];
+
+  const LEVELS = ["basic", "medium", "complete"];
 
   // Ordem das telas do tutorial.
   const TUTORIAL_VIEWS = ["intro", "commands", "shortcuts"];
@@ -24,29 +27,31 @@
       next: "Próximo",
       skip: "Pular Tutorial",
       intro: {
-        title: "O que é o Navpoint",
+        title: "Antes de começar",
         paragraphs: [
-          "O Navpoint é uma extensão para navegar mais rápido usando comandos, direto de um terminal flutuante que fica sobre qualquer página.",
-          "O visual é inspirado no universo Matrix e nos terminais Linux: fundo escuro, letras verdes e nada além do necessário. Esse estilo existe para ser simples, rápido e confortável de ler, inclusive em telas pequenas.",
-          "O Navpoint não é um terminal do sistema e não executa comandos arbitrários. Ele só abre endereços HTTP e HTTPS."
+          "Oi! Eu sou o criador do Navpoint e queria te contar rapidinho por que ele existe.",
+          "O Navpoint é um projeto pessoal. Eu sempre fui fascinado pelo universo de Matrix e pela estética dos terminais clássicos: tela escura, letras verdes, aquela sensação de estar com o controle na mão.",
+          "Quis trazer isso para o dia a dia do navegador, de um jeito prático e fluido. Em vez de procurar abas e digitar endereços longos, você escreve o que quer e o Navpoint leva você até lá.",
+          "Espero que ele deixe a sua navegação mais rápida e um pouco mais divertida."
         ]
       },
       commands: {
-        title: "Comandos básicos",
-        text: "Digite os comandos no terminal e envie:",
+        title: "Como usar",
+        text: "É bem simples. Abra o terminal, escreva o comando e envie:",
         rows: [
-          ["open endereço", "Abre um site. Exemplo: open youtube.com"],
-          ["help", "Mostra os comandos disponíveis."],
-          ["list", "Mostra os seus atalhos."],
-          ["remove NOME", "Apaga um atalho pelo nome."],
-          ["clear", "Limpa o terminal e o histórico."]
-        ]
+          ["open youtube.com", "Abre o site na hora. Dá até para escrever só open youtube."],
+          ["add", "Cria um atalho para um site que você visita sempre."],
+          ["list", "Mostra os atalhos que você já criou."],
+          ["remove NOME", "Apaga um atalho que você não usa mais."]
+        ],
+        note:
+          "Se esquecer algum comando, é só digitar help. E fica tranquilo: o Navpoint só abre sites, nada além disso."
       },
       shortcuts: {
-        title: "Atalhos",
+        title: "Seus atalhos",
         paragraphs: [
-          "Atalhos são nomes curtos para os seus sites favoritos. Digite add, informe um nome e o endereço, e pronto.",
-          "Depois de criado, basta digitar o nome do atalho para abrir o site."
+          "Atalho é um apelido para um site. Você digita add, escolhe um nome e o endereço, e pronto.",
+          "Depois é só escrever o nome no terminal e o site abre. Um nome curto no lugar de um endereço inteiro."
         ],
         example: [
           "> add",
@@ -56,11 +61,32 @@
           "> yt"
         ],
         note:
-          "Atalhos têm prioridade sobre o reconhecimento automático de endereços. Não é possível repetir nomes nem usar nomes de comandos, como help ou open. Maiúsculas e minúsculas não fazem diferença."
+          "Pode escolher o nome que quiser, só não vale repetir nem usar o nome de um comando (como open ou help). Maiúscula ou minúscula não faz diferença."
       },
       levels: {
-        title: "Níveis de configuração",
-        text: "Esta etapa está em desenvolvimento. Aqui você vai escolher entre os níveis Básico, Médio e Completo."
+        title: "Como você quer configurar?",
+        subtitle:
+          "Escolha o quanto quer personalizar agora. Depois você poderá mudar tudo nas configurações.",
+        error: "Não foi possível salvar sua escolha. Tente novamente.",
+        options: {
+          basic: {
+            name: "Básico",
+            desc: "Só o essencial, para você começar a usar rapidinho."
+          },
+          medium: {
+            name: "Médio",
+            desc: "O essencial, mais algumas preferências e atalhos comuns."
+          },
+          complete: {
+            name: "Completo",
+            desc: "Todas as opções de personalização do terminal e do visual."
+          }
+        }
+      },
+      setupShortcuts: {
+        title: "Seus primeiros atalhos",
+        text: "Esta etapa está em desenvolvimento. Aqui você vai criar seus primeiros atalhos.",
+        levelLabel: "Nível escolhido:"
       }
     },
 
@@ -76,29 +102,31 @@
       next: "Next",
       skip: "Skip Tutorial",
       intro: {
-        title: "What is Navpoint",
+        title: "Before we start",
         paragraphs: [
-          "Navpoint is an extension for browsing faster with commands, right from a floating terminal that sits on top of any page.",
-          "Its look is inspired by the Matrix universe and Linux terminals: dark background, green letters and nothing more than necessary. This style exists to be simple, fast and comfortable to read, even on small screens.",
-          "Navpoint is not a system terminal and does not run arbitrary commands. It only opens HTTP and HTTPS addresses."
+          "Hi! I'm the creator of Navpoint, and I wanted to tell you quickly why it exists.",
+          "Navpoint is a personal project. I've always been fascinated by the Matrix universe and the look of classic terminals: dark screen, green letters, that feeling of having full control in your hands.",
+          "I wanted to bring that into everyday browsing, in a practical and fluid way. Instead of hunting for tabs and typing long addresses, you write what you want and Navpoint takes you there.",
+          "I hope it makes your browsing faster and a little more fun."
         ]
       },
       commands: {
-        title: "Basic commands",
-        text: "Type the commands in the terminal and send:",
+        title: "How to use it",
+        text: "It's really simple. Open the terminal, type the command and send it:",
         rows: [
-          ["open address", "Opens a website. Example: open youtube.com"],
-          ["help", "Shows the available commands."],
-          ["list", "Shows your shortcuts."],
-          ["remove NAME", "Deletes a shortcut by name."],
-          ["clear", "Clears the terminal and the history."]
-        ]
+          ["open youtube.com", "Opens the site right away. You can even type just open youtube."],
+          ["add", "Creates a shortcut for a site you visit all the time."],
+          ["list", "Shows the shortcuts you have already created."],
+          ["remove NAME", "Deletes a shortcut you no longer use."]
+        ],
+        note:
+          "If you forget a command, just type help. And don't worry: Navpoint only opens websites, nothing more."
       },
       shortcuts: {
-        title: "Shortcuts",
+        title: "Your shortcuts",
         paragraphs: [
-          "Shortcuts are short names for your favorite websites. Type add, enter a name and the address, and you are done.",
-          "Once created, just type the shortcut name to open the website."
+          "A shortcut is a nickname for a website. You type add, pick a name and the address, and that's it.",
+          "After that, just type the name in the terminal and the site opens. A short name instead of a whole address."
         ],
         example: [
           "> add",
@@ -108,11 +136,32 @@
           "> yt"
         ],
         note:
-          "Shortcuts take priority over automatic address recognition. You cannot repeat names or use command names, such as help or open. Uppercase and lowercase make no difference."
+          "Pick any name you like, just don't repeat one or use a command name (like open or help). Uppercase or lowercase makes no difference."
       },
       levels: {
-        title: "Setup levels",
-        text: "This step is under development. Here you will choose between the Basic, Medium and Complete levels."
+        title: "How do you want to set it up?",
+        subtitle:
+          "Choose how much you want to customize now. You'll be able to change everything later in the settings.",
+        error: "Could not save your choice. Please try again.",
+        options: {
+          basic: {
+            name: "Basic",
+            desc: "Just the essentials, so you can start using it right away."
+          },
+          medium: {
+            name: "Medium",
+            desc: "The essentials plus a few preferences and common shortcuts."
+          },
+          complete: {
+            name: "Complete",
+            desc: "Every customization option for the terminal and the look."
+          }
+        }
+      },
+      setupShortcuts: {
+        title: "Your first shortcuts",
+        text: "This step is under development. Here you will create your first shortcuts.",
+        levelLabel: "Chosen level:"
       }
     },
 
@@ -128,29 +177,31 @@
       next: "Siguiente",
       skip: "Omitir tutorial",
       intro: {
-        title: "Qué es Navpoint",
+        title: "Antes de empezar",
         paragraphs: [
-          "Navpoint es una extensión para navegar más rápido usando comandos, desde un terminal flotante que aparece sobre cualquier página.",
-          "Su aspecto está inspirado en el universo Matrix y en los terminales Linux: fondo oscuro, letras verdes y nada más de lo necesario. Este estilo existe para ser simple, rápido y cómodo de leer, incluso en pantallas pequeñas.",
-          "Navpoint no es un terminal del sistema y no ejecuta comandos arbitrarios. Solo abre direcciones HTTP y HTTPS."
+          "¡Hola! Soy el creador de Navpoint y quería contarte rápido por qué existe.",
+          "Navpoint es un proyecto personal. Siempre me fascinó el universo de Matrix y la estética de los terminales clásicos: pantalla oscura, letras verdes, esa sensación de tener el control en las manos.",
+          "Quise llevar eso al día a día del navegador, de una forma práctica y fluida. En vez de buscar pestañas y escribir direcciones largas, escribes lo que quieres y Navpoint te lleva hasta allí.",
+          "Espero que haga tu navegación más rápida y un poco más divertida."
         ]
       },
       commands: {
-        title: "Comandos básicos",
-        text: "Escribe los comandos en el terminal y envíalos:",
+        title: "Cómo usarlo",
+        text: "Es muy simple. Abre el terminal, escribe el comando y envíalo:",
         rows: [
-          ["open dirección", "Abre un sitio. Ejemplo: open youtube.com"],
-          ["help", "Muestra los comandos disponibles."],
-          ["list", "Muestra tus atajos."],
-          ["remove NOMBRE", "Elimina un atajo por su nombre."],
-          ["clear", "Limpia el terminal y el historial."]
-        ]
+          ["open youtube.com", "Abre el sitio al instante. Incluso puedes escribir solo open youtube."],
+          ["add", "Crea un atajo para un sitio que visitas siempre."],
+          ["list", "Muestra los atajos que ya creaste."],
+          ["remove NOMBRE", "Elimina un atajo que ya no usas."]
+        ],
+        note:
+          "Si olvidas algún comando, escribe help. Y tranquilo: Navpoint solo abre sitios web, nada más."
       },
       shortcuts: {
-        title: "Atajos",
+        title: "Tus atajos",
         paragraphs: [
-          "Los atajos son nombres cortos para tus sitios favoritos. Escribe add, indica un nombre y la dirección, y listo.",
-          "Una vez creado, solo escribe el nombre del atajo para abrir el sitio."
+          "Un atajo es un apodo para un sitio web. Escribes add, eliges un nombre y la dirección, y listo.",
+          "Después solo escribe el nombre en el terminal y el sitio se abre. Un nombre corto en lugar de una dirección completa."
         ],
         example: [
           "> add",
@@ -160,11 +211,32 @@
           "> yt"
         ],
         note:
-          "Los atajos tienen prioridad sobre el reconocimiento automático de direcciones. No se pueden repetir nombres ni usar nombres de comandos, como help u open. Mayúsculas y minúsculas no importan."
+          "Puedes elegir el nombre que quieras, solo no repitas uno ni uses el nombre de un comando (como open o help). Mayúsculas o minúsculas no importan."
       },
       levels: {
-        title: "Niveles de configuración",
-        text: "Este paso está en desarrollo. Aquí elegirás entre los niveles Básico, Medio y Completo."
+        title: "¿Cómo quieres configurarlo?",
+        subtitle:
+          "Elige cuánto quieres personalizar ahora. Después podrás cambiar todo en la configuración.",
+        error: "No se pudo guardar tu elección. Inténtalo de nuevo.",
+        options: {
+          basic: {
+            name: "Básico",
+            desc: "Solo lo esencial, para que empieces a usarlo ya."
+          },
+          medium: {
+            name: "Medio",
+            desc: "Lo esencial, más algunas preferencias y atajos comunes."
+          },
+          complete: {
+            name: "Completo",
+            desc: "Todas las opciones de personalización del terminal y del aspecto."
+          }
+        }
+      },
+      setupShortcuts: {
+        title: "Tus primeros atajos",
+        text: "Este paso está en desarrollo. Aquí crearás tus primeros atajos.",
+        levelLabel: "Nivel elegido:"
       }
     }
   };
@@ -231,9 +303,11 @@
   }
 
   let selected = detectLanguage();
+  let selectedLevel = "basic";
   let view = "language";
 
   const optionButtons = new Map();
+  let levelButtons = new Map();
 
   function setStatus(message, isError = false) {
     status.textContent = message;
@@ -283,6 +357,56 @@
     return list;
   }
 
+  function updateLevelButtons() {
+    levelButtons.forEach((button, code) => {
+      button.setAttribute("aria-checked", String(code === selectedLevel));
+    });
+  }
+
+  function makeLevelList(texts) {
+    const list = document.createElement("div");
+
+    list.className = "level-list";
+    list.setAttribute("role", "radiogroup");
+    list.setAttribute("aria-label", texts.levels.title);
+
+    levelButtons = new Map();
+
+    LEVELS.forEach(code => {
+      const option = texts.levels.options[code];
+
+      const button = document.createElement("button");
+      const nameElement = document.createElement("span");
+      const descElement = document.createElement("span");
+
+      button.type = "button";
+      button.className = "level-option";
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", "false");
+
+      nameElement.className = "level-name";
+      descElement.className = "level-desc";
+
+      nameElement.textContent = option.name;
+      descElement.textContent = option.desc;
+
+      button.append(nameElement, descElement);
+
+      button.addEventListener("click", () => {
+        selectedLevel = code;
+        setStatus("");
+        updateLevelButtons();
+      });
+
+      list.appendChild(button);
+      levelButtons.set(code, button);
+    });
+
+    updateLevelButtons();
+
+    return list;
+  }
+
   function renderContent(texts) {
     contentArea.replaceChildren();
 
@@ -295,6 +419,7 @@
     if (view === "commands") {
       contentArea.appendChild(makeParagraph(texts.commands.text));
       contentArea.appendChild(makeCommandList(texts.commands.rows));
+      contentArea.appendChild(makeParagraph(texts.commands.note));
     }
 
     if (view === "shortcuts") {
@@ -307,7 +432,21 @@
     }
 
     if (view === "levels") {
-      contentArea.appendChild(makeParagraph(texts.levels.text));
+      contentArea.appendChild(makeLevelList(texts));
+    }
+
+    if (view === "setupShortcuts") {
+      contentArea.appendChild(makeParagraph(texts.setupShortcuts.text));
+
+      const chosen = document.createElement("p");
+
+      chosen.className = "chosen-level";
+      chosen.textContent =
+        texts.setupShortcuts.levelLabel +
+        " " +
+        texts.levels.options[selectedLevel].name;
+
+      contentArea.appendChild(chosen);
     }
   }
 
@@ -316,6 +455,7 @@
     const isLanguage = view === "language";
     const tutorialIndex = TUTORIAL_VIEWS.indexOf(view);
     const isTutorial = tutorialIndex !== -1;
+    const isLevels = view === "levels";
 
     document.documentElement.lang = selected;
 
@@ -324,8 +464,10 @@
       stepLabel.textContent = "1/4";
     } else if (isTutorial) {
       stepLabel.textContent = "2/4";
-    } else {
+    } else if (isLevels) {
       stepLabel.textContent = "3/4";
+    } else {
+      stepLabel.textContent = "4/4";
     }
 
     // Título e subtítulo.
@@ -334,9 +476,15 @@
       subtitle.textContent = texts.languageSubtitle;
     } else {
       title.textContent = texts[view].title;
-      subtitle.textContent = isTutorial
-        ? (tutorialIndex + 1) + " / " + TUTORIAL_VIEWS.length
-        : "";
+
+      if (isTutorial) {
+        subtitle.textContent =
+          (tutorialIndex + 1) + " / " + TUTORIAL_VIEWS.length;
+      } else if (isLevels) {
+        subtitle.textContent = texts.levels.subtitle;
+      } else {
+        subtitle.textContent = "";
+      }
     }
 
     // Áreas visíveis.
@@ -359,7 +507,7 @@
     nextButton.textContent = texts.next;
     skipButton.textContent = texts.skip;
 
-    confirmButton.hidden = !isLanguage;
+    confirmButton.hidden = !(isLanguage || isLevels);
     backButton.hidden = isLanguage;
     nextButton.hidden = !isTutorial;
     skipButton.hidden = !isTutorial;
@@ -402,17 +550,28 @@
     optionButtons.set(language.code, button);
   });
 
-  // Confirmar idioma e seguir para a apresentação.
+  // Confirmar: salva o idioma ou o nível e avança.
   confirmButton.addEventListener("click", async () => {
+    const texts = TEXTS[selected];
+
     confirmButton.disabled = true;
-    setStatus(TEXTS[selected].saving);
+    setStatus(texts.saving);
 
     try {
-      await chrome.storage.local.set({ [LANGUAGE_KEY]: selected });
-      goTo("intro");
+      if (view === "language") {
+        await chrome.storage.local.set({ [LANGUAGE_KEY]: selected });
+        goTo("intro");
+      } else if (view === "levels") {
+        await chrome.storage.local.set({ [LEVEL_KEY]: selectedLevel });
+        goTo("setupShortcuts");
+      }
     } catch (error) {
-      console.warn("Navpoint: erro ao salvar o idioma.", error);
-      setStatus(TEXTS[selected].error, true);
+      console.warn("Navpoint: erro ao salvar.", error);
+
+      setStatus(
+        view === "levels" ? texts.levels.error : texts.error,
+        true
+      );
     } finally {
       confirmButton.disabled = false;
     }
@@ -432,6 +591,11 @@
   });
 
   backButton.addEventListener("click", () => {
+    if (view === "setupShortcuts") {
+      goTo("levels");
+      return;
+    }
+
     if (view === "levels") {
       goTo(TUTORIAL_VIEWS[TUTORIAL_VIEWS.length - 1]);
       return;
@@ -450,16 +614,23 @@
     goTo("levels");
   });
 
-  // Carrega o idioma já salvo, se existir.
+  // Carrega o idioma e o nível já salvos, se existirem.
   async function init() {
     try {
-      const saved = await chrome.storage.local.get(LANGUAGE_KEY);
+      const saved = await chrome.storage.local.get([
+        LANGUAGE_KEY,
+        LEVEL_KEY
+      ]);
 
       if (TEXTS[saved[LANGUAGE_KEY]]) {
         selected = saved[LANGUAGE_KEY];
       }
+
+      if (LEVELS.includes(saved[LEVEL_KEY])) {
+        selectedLevel = saved[LEVEL_KEY];
+      }
     } catch (error) {
-      console.warn("Navpoint: erro ao ler o idioma salvo.", error);
+      console.warn("Navpoint: erro ao ler as preferências salvas.", error);
     }
 
     render();
