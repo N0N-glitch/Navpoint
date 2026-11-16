@@ -19,6 +19,20 @@ body {
   font-family: var(--font);
 }
 
+/* Esconde a tela enquanto a chuva cobre tudo.
+   O script remove a classe; a animação é só uma segurança
+   para a tela nunca ficar escondida para sempre. */
+html.entering .screen {
+  visibility: hidden;
+  animation: navpoint-show 0s linear 4s forwards;
+}
+
+@keyframes navpoint-show {
+  to {
+    visibility: visible;
+  }
+}
+
 .screen {
   display: flex;
   flex-direction: column;
