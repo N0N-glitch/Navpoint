@@ -143,7 +143,7 @@ h1 {
   font-weight: bold;
 }
 
-/* Apresentação, tutorial e telas provisórias */
+/* Apresentação, tutorial e demais telas */
 
 .content-area {
   flex: 1;
@@ -193,6 +193,66 @@ h1 {
   color: var(--green-dim);
   font-size: 14px;
   line-height: 1.5;
+}
+
+/* Níveis de configuração */
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.level-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--green-dim);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--green);
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.level-name {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.level-name::before {
+  content: "[ ] ";
+}
+
+.level-desc {
+  color: var(--green-dim);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.level-option[aria-checked="true"] {
+  background: var(--green);
+  color: #000000;
+}
+
+.level-option[aria-checked="true"] .level-name::before {
+  content: "[x] ";
+}
+
+.level-option[aria-checked="true"] .level-desc {
+  color: #003300;
+}
+
+.chosen-level {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--green-faint);
+  border-radius: 6px;
+  font-size: 15px;
 }
 
 .status {
@@ -255,6 +315,7 @@ h1 {
 }
 
 .option:focus-visible,
+.level-option:focus-visible,
 .confirm:focus-visible,
 .ghost:focus-visible {
   outline: 2px solid var(--green);
@@ -270,4 +331,4 @@ h1 {
   .cursor {
     animation: none;
   }
-}
+    }
