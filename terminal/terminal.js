@@ -1,4 +1,3 @@
-
 (() => {
   "use strict";
 
@@ -37,6 +36,22 @@
   const HISTORY_KEY = "navpoint_terminal_history";
   const SHORTCUTS_KEY = "navpoint_shortcuts";
   const MAX_HISTORY = 200;
+
+  // Nomes que não podem ser usados como atalhos.
+  const RESERVED_NAMES = [
+    "help",
+    "clear",
+    "version",
+    "open",
+    "add",
+    "list",
+    "remove",
+    "settings",
+    "config",
+    "__proto__",
+    "prototype",
+    "constructor"
+  ];
 
   let history = [];
   let shortcuts = Object.create(null);
@@ -112,38 +127,53 @@
   loadHistory();
 
   // Atalhos personalizados.
+  function isStoredUrlValid(value) {
+    try {
+      const parsed = new URL(value);
+
+      return (
+        ["http:", "https:"].includes(parsed.protocol) &&
+        !parsed.username &&
+        !parsed.password
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  // Sempre relê o armazenamento para evitar dados
+  // desatualizados entre abas ou aberturas do terminal.
   function loadShortcuts() {
+    const safeShortcuts = Object.create(null);
+
     try {
       const saved = localStorage.getItem(SHORTCUTS_KEY);
 
-      if (!saved) return;
+      if (saved) {
+        const parsed = JSON.parse(saved);
 
-      const parsed = JSON.parse(saved);
-
-      if (
-        !parsed ||
-        typeof parsed !== "object" ||
-        Array.isArray(parsed)
-      ) {
-        return;
-      }
-
-      const safeShortcuts = Object.create(null);
-
-      Object.keys(parsed).forEach(key => {
         if (
-          /^[a-zA-Z0-9_-]+$/.test(key) &&
-          typeof parsed[key] === "string"
+          parsed &&
+          typeof parsed === "object" &&
+          !Array.isArray(parsed)
         ) {
-          safeShortcuts[key] = parsed[key];
+          Object.keys(parsed).forEach(key => {
+            if (
+              /^[a-zA-Z0-9_-]+$/.test(key) &&
+              !RESERVED_NAMES.includes(key.toLowerCase()) &&
+              typeof parsed[key] === "string" &&
+              isStoredUrlValid(parsed[key])
+            ) {
+              safeShortcuts[key] = parsed[key];
+            }
+          });
         }
-      });
-
-      shortcuts = safeShortcuts;
+      }
     } catch (error) {
-      shortcuts = Object.create(null);
       console.warn("Navpoint: erro ao carregar atalhos.", error);
     }
+
+    shortcuts = safeShortcuts;
   }
 
   function saveShortcuts() {
@@ -158,6 +188,12 @@
       console.warn("Navpoint: erro ao salvar atalhos.", error);
       return false;
     }
+  }
+
+  function getSortedShortcutNames() {
+    return Object.keys(shortcuts).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
   }
 
   loadShortcuts();
@@ -295,6 +331,9 @@
   shortcutForm.addEventListener("submit", event => {
     event.preventDefault();
 
+    // Garante que a verificação de duplicados use dados atuais.
+    loadShortcuts();
+
     const name = shortcutName.value.trim();
     const address = shortcutUrl.value.trim();
 
@@ -314,22 +353,7 @@
 
     const alias = name.toLowerCase();
 
-    const reservedNames = [
-      "help",
-      "clear",
-      "version",
-      "open",
-      "add",
-      "list",
-      "remove",
-      "settings",
-      "config",
-      "__proto__",
-      "prototype",
-      "constructor"
-    ];
-
-    if (reservedNames.includes(alias)) {
+    if (RESERVED_NAMES.includes(alias)) {
       shortcutFeedback.textContent =
         "Esse nome é reservado para um comando do Navpoint.";
       shortcutFeedback.className = "shortcut-feedback error";
@@ -382,7 +406,7 @@
 
   // Listar atalhos cadastrados.
   function listShortcuts() {
-    const names = Object.keys(shortcuts);
+    const names = getSortedShortcutNames();
 
     if (names.length === 0) {
       printMessage("Você ainda não possui atalhos cadastrados.");
@@ -401,7 +425,7 @@
 
   // Remover um atalho.
   function removeShortcut(name) {
-    if (!name) {
+    if (!name || /\s/.test(name)) {
       printMessage("Uso correto: remove NOME");
       printMessage("Digite list para consultar seus atalhos.");
       return;
@@ -446,6 +470,9 @@
     if (!command) return;
 
     printMessage("> " + command);
+
+    // Relê os atalhos para refletir alterações feitas em outra aba.
+    loadShortcuts();
 
     const firstSpace = command.search(/\s/);
 
