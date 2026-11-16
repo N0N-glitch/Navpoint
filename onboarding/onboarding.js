@@ -59,6 +59,30 @@
     return;
   }
 
+  // Mostra a tela. Se veio da chuva de código, a chuva
+  // cobre tudo primeiro e some revelando a tela.
+  function showScreen() {
+    document.documentElement.classList.remove("entering");
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const cameFromRain = params.get("transition") === "rain";
+
+  if (cameFromRain) {
+    // Limpa o endereço para a animação não repetir ao recarregar.
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+
+  if (cameFromRain && window.NavpointRain) {
+    window.NavpointRain.play({
+      mode: "reveal",
+      duration: 2600,
+      onReveal: showScreen
+    });
+  } else {
+    showScreen();
+  }
+
   let selected = detectLanguage();
   const optionButtons = new Map();
 
