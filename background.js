@@ -1,33 +1,7 @@
 (() => {
   "use strict";
 
-  const ONBOARDING_PAGE = "onboarding/onboarding.html";
-  const ONBOARDING_DONE_KEY = "navpoint_onboarding_done";
-
-  // Abre o onboarding na primeira execução.
-  // Também abre após uma atualização/recarga da extensão
-  // enquanto o onboarding ainda não foi concluído.
-  chrome.runtime.onInstalled.addListener(async details => {
-    if (details.reason !== "install" && details.reason !== "update") {
-      return;
-    }
-
-    try {
-      if (details.reason === "update") {
-        const saved = await chrome.storage.local.get(ONBOARDING_DONE_KEY);
-
-        if (saved[ONBOARDING_DONE_KEY] === true) {
-          return;
-        }
-      }
-
-      await chrome.tabs.create({
-        url: chrome.runtime.getURL(ONBOARDING_PAGE)
-      });
-    } catch (error) {
-      console.warn("Navpoint: não foi possível abrir o onboarding.", error);
-    }
-  });
+  const ONBOARDING_URL = "onboarding/onboarding.html?transition=rain";
 
   function normalizeAddress(value) {
     if (typeof value !== "string" || !value.trim()) {
@@ -73,51 +47,73 @@
 
   chrome.runtime.onMessage.addListener(
     (message, sender, sendResponse) => {
-      if (message?.type !== "NAVPOINT_OPEN_URL") {
-        return;
-      }
-
-      if (!sender.tab || typeof sender.tab.id !== "number") {
-        sendResponse({
-          ok: false,
-          error: "Não foi possível identificar a aba atual."
-        });
-
-        return;
-      }
-
-      let url;
-
-      try {
-        url = normalizeAddress(message.url);
-      } catch (error) {
-        sendResponse({
-          ok: false,
-          error: error.message
-        });
-
-        return;
-      }
-
-      chrome.tabs.update(sender.tab.id, { url }, () => {
-        const browserError = chrome.runtime.lastError;
-
-        if (browserError) {
+      // Abrir um endereço na aba atual.
+      if (message?.type === "NAVPOINT_OPEN_URL") {
+        if (!sender.tab || typeof sender.tab.id !== "number") {
           sendResponse({
             ok: false,
-            error: "Não foi possível abrir esse endereço."
+            error: "Não foi possível identificar a aba atual."
           });
 
           return;
         }
 
-        sendResponse({
-          ok: true,
-          url
-        });
-      });
+        let url;
 
-      return true;
+        try {
+          url = normalizeAddress(message.url);
+        } catch (error) {
+          sendResponse({
+            ok: false,
+            error: error.message
+          });
+
+          return;
+        }
+
+        chrome.tabs.update(sender.tab.id, { url }, () => {
+          const browserError = chrome.runtime.lastError;
+
+          if (browserError) {
+            sendResponse({
+              ok: false,
+              error: "Não foi possível abrir esse endereço."
+            });
+
+            return;
+          }
+
+          sendResponse({
+            ok: true,
+            url
+          });
+        });
+
+        return true;
+      }
+
+      // Levar a aba atual para a página de configuração inicial.
+      if (message?.type === "NAVPOINT_OPEN_ONBOARDING") {
+        if (!sender.tab || typeof sender.tab.id !== "number") {
+          sendResponse({ ok: false });
+          return;
+        }
+
+        chrome.tabs.update(
+          sender.tab.id,
+          { url: chrome.runtime.getURL(ONBOARDING_URL) },
+          () => {
+            if (chrome.runtime.lastError) {
+              sendResponse({ ok: false });
+              return;
+            }
+
+            sendResponse({ ok: true });
+          }
+        );
+
+        return true;
+      }
     }
   );
 })();
