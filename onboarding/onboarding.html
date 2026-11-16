@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Navpoint</title>
+  <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+  <main class="screen">
+    <header class="top">
+      <span class="brand">NAVPOINT</span>
+      <span class="step" id="step-label">1/4</span>
+    </header>
+
+    <h1 id="title"></h1>
+    <p id="subtitle" class="subtitle"></p>
+
+    <section class="language-area">
+      <div class="selected-side" aria-live="polite">
+        <span id="selected-caption" class="selected-caption"></span>
+        <span class="selected-line">
+          <span class="prompt" aria-hidden="true">&gt;</span>
+          <strong id="selected-name" class="selected-name"></strong>
+          <span class="cursor" aria-hidden="true">_</span>
+        </span>
+      </div>
+
+      <div
+        id="language-options"
+        class="options-side"
+        role="radiogroup"
+        aria-labelledby="title"
+      ></div>
+    </section>
+
+    <p id="status" class="status" role="status"></p>
+
+    <footer class="bottom">
+      <button id="confirm-button" class="confirm" type="button"></button>
+    </footer>
+  </main>
+
+  <script src="onboarding.js"></script>
+</body>
+</html>
