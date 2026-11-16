@@ -1,6 +1,34 @@
 (() => {
   "use strict";
 
+  const ONBOARDING_PAGE = "onboarding/onboarding.html";
+  const ONBOARDING_DONE_KEY = "navpoint_onboarding_done";
+
+  // Abre o onboarding na primeira execução.
+  // Também abre após uma atualização/recarga da extensão
+  // enquanto o onboarding ainda não foi concluído.
+  chrome.runtime.onInstalled.addListener(async details => {
+    if (details.reason !== "install" && details.reason !== "update") {
+      return;
+    }
+
+    try {
+      if (details.reason === "update") {
+        const saved = await chrome.storage.local.get(ONBOARDING_DONE_KEY);
+
+        if (saved[ONBOARDING_DONE_KEY] === true) {
+          return;
+        }
+      }
+
+      await chrome.tabs.create({
+        url: chrome.runtime.getURL(ONBOARDING_PAGE)
+      });
+    } catch (error) {
+      console.warn("Navpoint: não foi possível abrir o onboarding.", error);
+    }
+  });
+
   function normalizeAddress(value) {
     if (typeof value !== "string" || !value.trim()) {
       throw new Error("Digite um endereço válido.");
@@ -93,4 +121,3 @@
     }
   );
 })();
-
