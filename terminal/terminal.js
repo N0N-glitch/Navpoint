@@ -35,6 +35,7 @@
   // Armazenamento local.
   const HISTORY_KEY = "navpoint_terminal_history";
   const SHORTCUTS_KEY = "navpoint_shortcuts";
+  const HISTORY_ENABLED_KEY = "navpoint_history_enabled";
   const MAX_HISTORY = 200;
 
   // Nomes que não podem ser usados como atalhos.
@@ -54,11 +55,14 @@
   ];
 
   let history = [];
+  let historyEnabled = true;
   let shortcuts = Object.create(null);
   let shortcutMode = false;
 
   // Histórico do terminal.
   function saveHistory() {
+    if (!historyEnabled) return;
+
     try {
       localStorage.setItem(
         HISTORY_KEY,
@@ -112,6 +116,9 @@
   function printMessage(message, className = "") {
     renderMessage(message, className);
 
+    // Com o histórico desativado, a mensagem só aparece na tela.
+    if (!historyEnabled) return;
+
     history.push({
       message: String(message),
       className: String(className)
@@ -124,7 +131,49 @@
     saveHistory();
   }
 
-  loadHistory();
+  function clearStoredHistory() {
+    history = [];
+
+    try {
+      localStorage.removeItem(HISTORY_KEY);
+    } catch (error) {
+      console.warn("Navpoint: erro ao apagar histórico.", error);
+    }
+  }
+
+  function applyHistorySetting(enabled) {
+    historyEnabled = enabled;
+
+    if (!enabled) {
+      clearStoredHistory();
+    }
+  }
+
+  // Lê a configuração e só então carrega o histórico.
+  async function initHistory() {
+    try {
+      const saved = await chrome.storage.local.get(HISTORY_ENABLED_KEY);
+      historyEnabled = saved[HISTORY_ENABLED_KEY] !== false;
+    } catch (error) {
+      historyEnabled = true;
+      console.warn("Navpoint: erro ao ler a configuração do histórico.", error);
+    }
+
+    if (historyEnabled) {
+      loadHistory();
+    } else {
+      clearStoredHistory();
+    }
+  }
+
+  // Reage a mudanças feitas no painel de configurações.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || !changes[HISTORY_ENABLED_KEY]) return;
+
+    applyHistorySetting(changes[HISTORY_ENABLED_KEY].newValue !== false);
+  });
+
+  initHistory();
 
   // Atalhos personalizados.
   function isStoredUrlValid(value) {
@@ -276,6 +325,32 @@
       },
       "*"
     );
+  }
+
+  // Abrir o painel de configurações.
+  function openSettings() {
+    try {
+      chrome.runtime.sendMessage(
+        { type: "NAVPOINT_OPEN_SETTINGS" },
+        response => {
+          if (chrome.runtime.lastError || !response || !response.ok) {
+            printMessage(
+              "Não foi possível abrir as configurações.",
+              "error"
+            );
+
+            return;
+          }
+
+          printMessage(
+            "Abrindo configurações em uma nova aba...",
+            "success"
+          );
+        }
+      );
+    } catch (error) {
+      printMessage("Não foi possível abrir as configurações.", "error");
+    }
   }
 
   // Receber respostas do content.js.
@@ -496,7 +571,7 @@
         printMessage("add — cadastrar um atalho.");
         printMessage("list — listar todos os atalhos.");
         printMessage("remove NOME — remover um atalho.");
-        printMessage("settings — abrir configurações (em desenvolvimento).");
+        printMessage("settings — abrir as configurações.");
         break;
 
       case "clear":
@@ -533,7 +608,7 @@
 
       case "settings":
       case "config":
-        printMessage("Este comando será implementado em uma próxima etapa.");
+        openSettings();
         break;
 
       default: {
