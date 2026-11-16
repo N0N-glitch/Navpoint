@@ -17,29 +17,55 @@
     <h1 id="title"></h1>
     <p id="subtitle" class="subtitle"></p>
 
-    <section class="language-area">
-      <div class="selected-side" aria-live="polite">
-        <span id="selected-caption" class="selected-caption"></span>
-        <span class="selected-line">
-          <span class="prompt" aria-hidden="true">&gt;</span>
-          <strong id="selected-name" class="selected-name"></strong>
-          <span class="cursor" aria-hidden="true">_</span>
-        </span>
+    <!-- Etapa 1: idioma -->
+    <section id="step-language" class="step-body">
+      <div class="language-area">
+        <div class="selected-side" aria-live="polite">
+          <span id="selected-caption" class="selected-caption"></span>
+          <span class="selected-line">
+            <span class="prompt" aria-hidden="true">&gt;</span>
+            <strong id="selected-name" class="selected-name"></strong>
+            <span class="cursor" aria-hidden="true">_</span>
+          </span>
+        </div>
+
+        <div
+          id="language-options"
+          class="options-side"
+          role="radiogroup"
+          aria-labelledby="title"
+        ></div>
       </div>
 
-      <div
-        id="language-options"
-        class="options-side"
-        role="radiogroup"
-        aria-labelledby="title"
-      ></div>
+      <p id="status" class="status" role="status"></p>
+
+      <footer class="bottom">
+        <button id="confirm-button" class="confirm" type="button"></button>
+      </footer>
     </section>
 
-    <p id="status" class="status" role="status"></p>
+    <!-- Etapa 2: apresentação e tutorial -->
+    <section id="step-tour" class="step-body" hidden>
+      <div id="tour-body" class="tour-body"></div>
 
-    <footer class="bottom">
-      <button id="confirm-button" class="confirm" type="button"></button>
-    </footer>
+      <p id="dots" class="dots" role="img"></p>
+
+      <footer class="tour-bottom">
+        <div class="tour-nav">
+          <button id="back-button" class="ghost" type="button"></button>
+          <button id="next-button" class="confirm" type="button"></button>
+        </div>
+
+        <div class="skip-row">
+          <button id="skip-button" class="skip" type="button"></button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Etapa 3: ainda em desenvolvimento -->
+    <section id="step-next" class="step-body" hidden>
+      <p id="next-text" class="tour-text"></p>
+    </section>
   </main>
 
   <script src="../shared/matrix-rain.js"></script>
