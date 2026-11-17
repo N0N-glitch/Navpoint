@@ -2,7 +2,6 @@
   "use strict";
 
   const LANGUAGE_KEY = "navpoint_language";
-  const LEVEL_KEY = "navpoint_setup_level";
   const OPEN_MODE_KEY = "navpoint_open_mode";
   const HISTORY_ENABLED_KEY = "navpoint_history_enabled";
 
@@ -31,7 +30,6 @@
     { code: "es", name: "Español" }
   ];
 
-  const LEVELS = ["basic", "medium", "complete"];
   const OPEN_MODES = ["same", "new"];
 
   const TEXTS = {
@@ -44,24 +42,6 @@
       language: {
         title: "Idioma",
         desc: "Idioma da extensão."
-      },
-      level: {
-        title: "Nível de configuração",
-        desc: "O quanto você quer personalizar.",
-        options: {
-          basic: {
-            name: "Básico",
-            desc: "Só o essencial, para você começar a usar rapidinho."
-          },
-          medium: {
-            name: "Médio",
-            desc: "O essencial, mais algumas preferências e atalhos comuns."
-          },
-          complete: {
-            name: "Completo",
-            desc: "Todas as opções de personalização do terminal e do visual."
-          }
-        }
       },
       openMode: {
         title: "Abertura de abas",
@@ -115,24 +95,6 @@
         title: "Language",
         desc: "Extension language."
       },
-      level: {
-        title: "Setup level",
-        desc: "How much you want to customize.",
-        options: {
-          basic: {
-            name: "Basic",
-            desc: "Just the essentials, so you can start using it right away."
-          },
-          medium: {
-            name: "Medium",
-            desc: "The essentials plus a few preferences and common shortcuts."
-          },
-          complete: {
-            name: "Complete",
-            desc: "Every customization option for the terminal and the look."
-          }
-        }
-      },
       openMode: {
         title: "Opening tabs",
         desc: "Where websites opened from the terminal should appear.",
@@ -184,24 +146,6 @@
       language: {
         title: "Idioma",
         desc: "Idioma de la extensión."
-      },
-      level: {
-        title: "Nivel de configuración",
-        desc: "Cuánto quieres personalizar.",
-        options: {
-          basic: {
-            name: "Básico",
-            desc: "Solo lo esencial, para que empieces a usarlo ya."
-          },
-          medium: {
-            name: "Medio",
-            desc: "Lo esencial, más algunas preferencias y atajos comunes."
-          },
-          complete: {
-            name: "Completo",
-            desc: "Todas las opciones de personalización del terminal y del aspecto."
-          }
-        }
       },
       openMode: {
         title: "Apertura de pestañas",
@@ -263,7 +207,6 @@
 
   // Estado atual das configurações.
   let lang = detectLanguage();
-  let level = "basic";
   let openMode = "same";
   let historyEnabled = true;
 
@@ -493,30 +436,6 @@
         choose(LANGUAGE_KEY, code, () => {
           lang = code;
           renderAll();
-        });
-      }
-    );
-
-    section.appendChild(choice.element);
-
-    return section;
-  }
-
-  function buildLevelSection(t) {
-    const section = makeCategory(t.level.title, t.level.desc);
-
-    const choice = makeChoiceList(
-      t.level.title,
-      LEVELS.map(value => ({
-        value,
-        name: t.level.options[value].name,
-        desc: t.level.options[value].desc
-      })),
-      () => level,
-      value => {
-        choose(LEVEL_KEY, value, () => {
-          level = value;
-          choice.update();
         });
       }
     );
@@ -833,7 +752,6 @@
 
     sectionsBox.replaceChildren(
       buildLanguageSection(t),
-      buildLevelSection(t),
       buildOpenModeSection(t),
       buildHistorySection(t),
       buildShortcutsSection(t)
@@ -852,17 +770,12 @@
     try {
       const saved = await chrome.storage.local.get([
         LANGUAGE_KEY,
-        LEVEL_KEY,
         OPEN_MODE_KEY,
         HISTORY_ENABLED_KEY
       ]);
 
       if (TEXTS[saved[LANGUAGE_KEY]]) {
         lang = saved[LANGUAGE_KEY];
-      }
-
-      if (LEVELS.includes(saved[LEVEL_KEY])) {
-        level = saved[LEVEL_KEY];
       }
 
       if (OPEN_MODES.includes(saved[OPEN_MODE_KEY])) {
